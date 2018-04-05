@@ -2,6 +2,8 @@ package stack
 
 import "strconv"
 
+// Q15
+
 type Stack struct {
 	size int
 	data [5]int

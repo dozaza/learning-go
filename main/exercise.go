@@ -4,6 +4,10 @@ import (
 	"fmt"
 	"unicode/utf8"
 	"strconv"
+	"container/list"
+	"os"
+	"bufio"
+	"io"
 )
 
 func main() {
@@ -97,6 +101,138 @@ func main() {
 	// 14.2
 	p2 := plusX(5)
 	fmt.Printf("%v\n", p2(2))
+
+	// 17.1
+	// All types support operation +
+	// 17.2
+	// Not all types support operation +
+
+	// 18
+	fmt.Println(myMap3(func(i T) T { return i.(int)* 2}, []T{1, 2, 3}))
+	fmt.Println(myMap3(func(i T) T { return i.(string) + "_new"}, []T{"a", "b"}))
+
+	// 19.1
+	// p1 is value, p2 is pointer
+	// 19.2
+	// first x is a pointer of what t is pointing, second x is a pointer of local variable t which is a copy
+
+	// 20.1
+	var l list.List
+	l.PushBack(1)
+	l.PushBack(2)
+	l.PushBack(4)
+
+	for i := l.Front(); i != nil; i = i.Next() {
+		fmt.Print(strconv.Itoa(i.Value.(int)) + ", ")
+	}
+	fmt.Println()
+	// 20.2
+	var l2 myList
+	l2.pushBack(1)
+	l2.pushBack(2)
+	l2.pushBack(4)
+
+	for i := l2.front(); i != nil; i = i.next {
+		fmt.Print(strconv.Itoa(i.value.(int)) + ", ")
+	}
+	fmt.Println()
+
+	// 21.1
+	simpleCat("./main/test.txt")
+	// 21.2
+	cat("./main/test.txt", "n")
+
+	// 22.1
+	// k1: IntVector, k2: *IntVector, k3: *IntVector
+	// 22.2
+	// cause it will try to find *IntVector automatically
+}
+
+func cat(fileName string, option string) {
+	file, e := os.Open(fileName)
+	if e != nil {
+		fmt.Printf("unable to read file: %s", e.Error())
+		return // exit the function on error
+	}
+	defer fmt.Println("")
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	num := 1
+	for {
+		str, e := reader.ReadString('\n')
+		if option == "n" {
+			fmt.Printf("%d: ", num)
+		}
+		fmt.Print(str)
+		num++
+
+		if e == io.EOF {
+			break
+		}
+	}
+}
+
+func simpleCat(fileName string) {
+	file, e := os.Open(fileName)
+	if e != nil {
+		fmt.Printf("unable to read file: %s", e.Error())
+		return // exit the function on error
+	}
+	defer fmt.Println("")
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	for {
+		str, e := reader.ReadString('\n')
+		fmt.Print(str)
+		if e == io.EOF {
+			break
+		}
+	}
+}
+
+type myList struct {
+	first *myElement
+	last *myElement
+	size int
+}
+
+func (l *myList) front() *myElement {
+	return l.first
+}
+
+func (l *myList) back() *myElement {
+	return l.last
+}
+
+func (l *myList) pushBack(v interface{}) {
+	newElement := myElement{value: v}
+	if l.first == nil {
+		l.first = &newElement
+		l.last = &newElement
+	} else {
+		l.last.next = &newElement
+		l.last = &newElement
+	}
+}
+
+type myElement struct {
+	value interface{}
+	prev *myElement
+	next *myElement
+}
+
+type T interface {
+
+}
+
+func myMap3(f func(T) T, array []T) []T {
+	tmp := make([]T, len(array))
+	for i, d := range array {
+		tmp[i] = f(d)
+	}
+	return tmp
 }
 
 func plusX(x int) func(int) int {
