@@ -8,6 +8,7 @@ import (
 	"os"
 	"bufio"
 	"io"
+	"runtime"
 )
 
 func main() {
@@ -159,6 +160,33 @@ func main() {
 	sf := SliceFloat64{1.1,3.3,2.2}
 	fmt.Println(Max(si))
 	fmt.Println(Max(sf))
+
+	runtime.GOMAXPROCS(4)
+	// 26
+	c := make(chan int)
+	done := make(chan bool)
+	go display(c, done)
+	for i := 0; i < 10; i++ {
+		c <- i
+	}
+	close (c)
+	<- done
+	
+}
+
+func display(c chan int, done chan bool) {
+	for {
+		select {
+		case i, more := <- c:
+			if more {
+				fmt.Print(strconv.Itoa(i) + " ")
+			} else {
+				fmt.Println("")
+				done <- true
+				break
+			}
+		}
+	}
 }
 
 type SliceInt []int
