@@ -138,14 +138,105 @@ func main() {
 	fmt.Println()
 
 	// 21.1
-	simpleCat("./main/test.txt")
+	simpleCat("./src/main/test.txt")
 	// 21.2
-	cat("./main/test.txt", "n")
+	cat("./src/main/test.txt", "n")
 
 	// 22.1
 	// k1: IntVector, k2: *IntVector, k3: *IntVector
 	// 22.2
 	// cause it will try to find *IntVector automatically
+
+	// 23.1
+	// type conversion check is in the runtime
+	// Before conversion, we can check with if v, ok := i.(MyType); ok {}
+
+	// 24.1
+	// reflect works only on pointer, cause funcation argument is parsed by value
+
+	// 25.2
+	si := SliceInt{1,3,2}
+	sf := SliceFloat64{1.1,3.3,2.2}
+	fmt.Println(Max(si))
+	fmt.Println(Max(sf))
+}
+
+type SliceInt []int
+type SliceFloat64 []float64
+
+type BaseSlice interface {
+	Compare(d1 interface{}, d2 interface{}) int
+	Len() int
+	Get(i int) interface{}
+}
+
+func Max(s BaseSlice) interface{} {
+	if s.Len() == 0 {
+		return nil
+	}
+
+	max := s.Get(0)
+	for i := 1; i < s.Len(); i++ {
+		if s.Compare(max, s.Get(i)) == -1 {
+			max = s.Get(i)
+		}
+	}
+
+	return max
+}
+
+func (s SliceInt) Compare(d1 interface{}, d2 interface{}) int {
+	switch d1.(type) {
+	case int:
+		switch d2.(type) {
+		case int:
+			i1 := d1.(int)
+			i2 := d2.(int)
+			if i1 == i2 {
+				return 0
+			} else if i1 < i2 {
+				return -1
+			} else if i1 > i2 {
+				return 1
+			}
+		}
+	}
+	panic("Wrong type")
+}
+
+func (s SliceInt) Len() int {
+	return len(s)
+}
+
+func (s SliceInt) Get(i int) interface{} {
+	return s[i]
+}
+
+func (s SliceFloat64) Compare(d1 interface{}, d2 interface{}) int {
+	switch d1.(type) {
+	case float64:
+		switch d2.(type) {
+		case float64:
+			i1 := d1.(float64)
+			i2 := d2.(float64)
+			if i1 == i2 {
+				return 0
+			} else if i1 < i2 {
+				return -1
+			} else if i1 > i2 {
+				return 1
+			}
+		}
+	}
+	panic("Wrong type")
+}
+
+func (s SliceFloat64) Len() int {
+	return len(s)
+}
+
+func (s SliceFloat64) Get(i int) interface{} {
+	return s[i]
 }
 
 func cat(fileName string, option string) {
